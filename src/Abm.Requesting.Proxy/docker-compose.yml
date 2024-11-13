@@ -1,0 +1,55 @@
+﻿name: pyro-requesting
+
+services:
+  
+  requesting-proxy:
+    container_name: requesting-proxy
+    image: abm.requesting.proxy:latest
+    depends_on:
+      pyro-server:       
+        condition: service_started        
+    networks:
+      - pyro-network
+    ports:
+      - "8080:8080"
+    environment:
+      - ReverseProxy__Clusters__pyro__Destinations__destination1__Address=http://pyro-server:8081/
+      - ReverseProxy__Clusters__claimOperation__Destinations__destination1__Address=http://requesting-claim-service:8083/
+      
+  pyro-server:
+    container_name: pyro-server
+    image: abm.pyro.api:latest
+    networks:
+      - pyro-network
+    ports:
+      - "8081:8081"
+    environment:
+      - ASPNETCORE_URLS=http://any:8081 
+      - ServiceBaseUrl__Url=http://localhost:8080/pyro 
+      - ConnectionStrings__PyroDb=${PyroConnectionString}
+      
+  requesting-claim-service:
+    container_name: requesting-claim-service
+    image: abm.requesting.claim:latest
+    depends_on:
+      pyro-server:
+        condition: service_started  
+      requesting-proxy:
+        condition: service_started
+    networks:
+      - pyro-network
+    ports:
+      - "8083:8083"
+    environment:
+     - ASPNETCORE_URLS=http://any:8083
+     - Settings__DefaultFhirRepositoryCode=Pyro
+     - Settings__GroupTaskTagSystem=http://fhir.geniesolutions.io/CodeSystem/eorders-tag
+     - Settings__GroupTaskTagCode=fulfillment-task-group
+     - FhirNavigator__FhirRepositories__0__Code=Pyro
+     - FhirNavigator__FhirRepositories__0__DisplayName=Pyro FHIR Server
+     - FhirNavigator__FhirRepositories__0__ServiceBaseUrl=http://pyro-server:8081/pyro     
+     
+networks:
+  pyro-network:
+    driver: bridge
+    
