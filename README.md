@@ -1,9 +1,7 @@
-# Pyro Server
-AU FHIR eRequesting Reverse Proxy
+# FHIR Requesting Proxy
+FHIR eRequesting Reverse Proxy
 
-#### Setup steps::
 
-1. Restore all nuget packages
 
 
 
