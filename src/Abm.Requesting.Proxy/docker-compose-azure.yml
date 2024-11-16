@@ -25,7 +25,7 @@ services:
       - "8081:8081"
     environment:
       - ASPNETCORE_URLS=http://any:8081 
-      - ServiceBaseUrl__Url=http://localhost:8080
+      - ServiceBaseUrl__Url=https://pyroserver.azurewebsites.net
       - ConnectionStrings__PyroDb=${PyroConnectionString}
       
   requesting-claim-service:
